@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Pflanzen bestimmen – Profi-Version</title>
+  <title>Pflanzen bestimmen – Erweiterte Profi-Version</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -10,7 +10,7 @@
 
 <div class="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-xl w-full text-center">
   <h1 class="text-xl md:text-2xl font-bold mb-2">🌼 Pflanzen bestimmen</h1>
-  <p class="text-sm mb-4">Finde die richtige Pflanze – Schritt für Schritt!</p>
+  <p class="text-sm mb-4">Erweiterter Bestimmungsschlüssel</p>
 
   <p id="frage" class="text-lg mb-4"></p>
 
@@ -31,42 +31,53 @@ const plantData = {
   "Wiesenkerbel 🌿": {img:"https://cdn.pixabay.com/photo/2018/05/01/18/48/plant-3360195_640.jpg", fam:"Doldenblütler"},
   "Löwenzahn 🌼": {img:"https://cdn.pixabay.com/photo/2017/04/23/19/30/dandelion-2252719_640.jpg", fam:"Korbblütler"},
   "Johanniskraut 🌿": {img:"https://cdn.pixabay.com/photo/2018/06/17/17/52/hypericum-3481324_640.jpg", fam:"Johanniskrautgewächse"},
+  "Hahnenfuß 🌼": {img:"https://cdn.pixabay.com/photo/2017/05/21/18/17/buttercup-2331461_640.jpg", fam:"Hahnenfußgewächse"},
+  "Gänseblümchen 🌼": {img:"https://cdn.pixabay.com/photo/2016/03/27/19/40/daisy-1284454_640.jpg", fam:"Korbblütler"},
   "Taubnessel 🌸": {img:"https://cdn.pixabay.com/photo/2017/05/16/21/21/dead-nettle-2319177_640.jpg", fam:"Lippenblütler"},
   "Wiesensalbei 🌿": {img:"https://cdn.pixabay.com/photo/2017/06/20/19/22/sage-2424376_640.jpg", fam:"Lippenblütler"},
+  "Thymian 🌿": {img:"https://cdn.pixabay.com/photo/2017/07/06/20/52/thyme-2478740_640.jpg", fam:"Lippenblütler"},
   "Glockenblume 🔔": {img:"https://cdn.pixabay.com/photo/2016/07/23/00/59/bellflower-1536089_640.jpg", fam:"Glockenblumengewächse"},
   "Witwenblume 🌸": {img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/flower-2558261_640.jpg", fam:"Geißblattgewächse"},
-  "Flockenblume 🌸": {img:"https://cdn.pixabay.com/photo/2018/06/10/20/01/cornflower-3467049_640.jpg", fam:"Korbblütler"}
+  "Flockenblume 🌸": {img:"https://cdn.pixabay.com/photo/2018/06/10/20/01/cornflower-3467049_640.jpg", fam:"Korbblütler"},
+  "Vergissmeinnicht 🌸": {img:"https://cdn.pixabay.com/photo/2017/04/09/17/38/forget-me-not-2215113_640.jpg", fam:"Raublattgewächse"}
 };
 
 const steps = {
   start:{frage:"Welche Farbe hat die Blüte?",optionen:[
-    {text:"Weiß",next:"weiss"},{text:"Gelb",next:"gelb"},{text:"Lila / Blau",next:"lila"}
+    {text:"Weiß",next:"weiss"},{text:"Gelb",next:"gelb"},{text:"Blau / Lila",next:"blau"}
   ]},
 
-  weiss:{frage:"Wie viele Blütenblätter hat die Blüte ungefähr?",optionen:[
-    {text:"Genau 5",result:"Walderdbeere 🍓"},
-    {text:"Viele kleine in einem Schirm",next:"dolde"}
+  weiss:{frage:"Wie sieht die Blüte aus?",optionen:[
+    {text:"Viele kleine Blüten (schirmförmig)",next:"dolde"},
+    {text:"Einzelne größere Blüte",result:"Gänseblümchen 🌼"}
   ]},
 
-  dolde:{frage:"Sind die Blüten wie ein Schirm angeordnet (Dolde)?",optionen:[
+  dolde:{frage:"Sind die Blüten wie ein Schirm angeordnet?",optionen:[
     {text:"Ja",result:"Wilde Möhre 🥕"},
     {text:"Nein",result:"Wiesenkerbel 🌿"}
   ]},
 
   gelb:{frage:"Wie viele Blütenblätter?",optionen:[
     {text:"Sehr viele kleine",result:"Löwenzahn 🌼"},
-    {text:"Genau 5",result:"Johanniskraut 🌿"}
+    {text:"5 glänzende",result:"Hahnenfuß 🌼"},
+    {text:"5 normale",result:"Johanniskraut 🌿"}
   ]},
 
-  lila:{frage:"Welche Form hat die Blüte?",optionen:[
-    {text:"Wie ein offener Mund (Lippenform)",next:"lippe"},
-    {text:"Wie eine Glocke",next:"glocke"},
-    {text:"Fransig / strahlig",result:"Flockenblume 🌸"}
+  blau:{frage:"Welche Form hat die Blüte?",optionen:[
+    {text:"Lippenform",next:"lippe"},
+    {text:"Glocke",next:"glocke"},
+    {text:"Sehr klein (sternförmig)",result:"Vergissmeinnicht 🌸"},
+    {text:"Fransig",result:"Flockenblume 🌸"}
   ]},
 
-  lippe:{frage:"Wie sieht die Blüte aus?",optionen:[
-    {text:"Mit Flecken",result:"Taubnessel 🌸"},
-    {text:"Einfarbig lila",result:"Wiesensalbei 🌿"}
+  lippe:{frage:"Wie sieht sie aus?",optionen:[
+    {text:"Gefleckt",result:"Taubnessel 🌸"},
+    {text:"Einfarbig",next:"lippe2"}
+  ]},
+
+  lippe2:{frage:"Welche Pflanze passt besser?",optionen:[
+    {text:"Größere Blüte",result:"Wiesensalbei 🌿"},
+    {text:"Kleine Blüten",result:"Thymian 🌿"}
   ]},
 
   glocke:{frage:"Glockenförmig?",optionen:[
@@ -117,4 +128,5 @@ render("start");
 
 </body>
 </html>
+
 
