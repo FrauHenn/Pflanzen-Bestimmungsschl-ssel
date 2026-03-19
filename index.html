@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Pflanzen bestimmen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-50 flex items-center justify-center min-h-screen">
+
+<div class="bg-white shadow-xl rounded-2xl p-6 max-w-xl w-full text-center">
+  <h1 class="text-2xl font-bold mb-4">🌼 Pflanzen bestimmen</h1>
+  <p id="frage" class="text-lg mb-6">Welche Blütenfarbe hat die Pflanze?</p>
+
+  <div id="buttons" class="grid gap-3"></div>
+</div>
+
+<script>
+const steps = {
+  start: {
+    frage: "Welche Blütenfarbe hat die Pflanze?",
+    optionen: [
+      {text: "Weiß", next: "weiss"},
+      {text: "Gelb", next: "gelb"},
+      {text: "Lila / Blau", next: "lila"}
+    ]
+  },
+
+  weiss: {
+    frage: "Wie viele Blütenblätter hat die Blüte?",
+    optionen: [
+      {text: "5", next: "dolde"},
+      {text: "Weniger als 5", next: "form_weiss"}
+    ]
+  },
+
+  dolde: {
+    frage: "Sind die Blüten wie ein Schirm (Dolde) angeordnet?",
+    optionen: [
+      {text: "Ja", result: "Das ist wahrscheinlich die Wilde Möhre 🥕"},
+      {text: "Nein", result: "Das ist wahrscheinlich die Walderdbeere 🍓"}
+    ]
+  },
+
+  form_weiss: {
+    frage: "Sind die Blütenblätter rund oder spitz?",
+    optionen: [
+      {text: "Rund", result: "Das ist wahrscheinlich Knoblauchsrauke 🌿"},
+      {text: "Spitz", result: "Das ist wahrscheinlich Wiesenkerbel 🌼"}
+    ]
+  },
+
+  gelb: {
+    frage: "Wie viele Blütenblätter hat die Blüte?",
+    optionen: [
+      {text: "Mehr als 5", result: "Das ist wahrscheinlich Löwenzahn 🌼"},
+      {text: "Genau 5", result: "Das ist wahrscheinlich Johanniskraut 🌿"}
+    ]
+  },
+
+  lila: {
+    frage: "Hat die Blüte eine Lippenform (wie ein offener Mund)?",
+    optionen: [
+      {text: "Ja", next: "farbe_lippe"},
+      {text: "Nein", next: "glocke"}
+    ]
+  },
+
+  farbe_lippe: {
+    frage: "Welche Farbe hat die Blüte genau?",
+    optionen: [
+      {text: "Gefleckt", result: "Das ist wahrscheinlich Gefleckte Taubnessel 🌸"},
+      {text: "Lila", result: "Das ist wahrscheinlich Wiesensalbei 🌿"}
+    ]
+  },
+
+  glocke: {
+    frage: "Ist die Blüte glockenförmig?",
+    optionen: [
+      {text: "Ja", result: "Das ist wahrscheinlich eine Glockenblume 🔔"},
+      {text: "Nein", result: "Das ist wahrscheinlich eine Ackerwitwenblume 🌸"}
+    ]
+  }
+};
+
+function render(stepKey) {
+  const step = steps[stepKey];
+  document.getElementById("frage").innerText = step.frage;
+  const container = document.getElementById("buttons");
+  container.innerHTML = "";
+
+  step.optionen.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "bg-green-200 hover:bg-green-300 p-3 rounded-xl";
+    btn.innerText = opt.text;
+
+    btn.onclick = () => {
+      if (opt.result) {
+        document.getElementById("frage").innerText = opt.result;
+        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-2 rounded">Neu starten</button>';
+      } else {
+        render(opt.next);
+      }
+    };
+
+    container.appendChild(btn);
+  });
+}
+
+render("start");
+</script>
+
+</body>
+</html>
