@@ -14,7 +14,7 @@
 
   <p id="frage" class="text-lg mb-4"></p>
 
-  <img id="realbild" class="mx-auto mb-4 rounded-xl hidden max-h-56" />
+  <img id="realbild" class="mx-auto mb-4 rounded-xl hidden max-h-56" alt="Pflanzenbild" onerror="this.style.display='none'; document.getElementById('familie').innerText += ' (Bild konnte nicht geladen werden)';" />
   <p id="familie" class="text-sm mb-2"></p>
 
   <div id="buttons" class="grid gap-3"></div>
@@ -121,7 +121,7 @@ function render(stepKey){
         const data=plantData[opt.result];
         if(data){
           const img=document.getElementById("realbild");
-          img.src=data.img;
+          img.style.display='block'; img.src=data.img;
           img.classList.remove("hidden");
           document.getElementById("familie").innerText="Familie: "+data.fam;
         }
@@ -138,3 +138,4 @@ render("start");
 
 </body>
 </html>
+
