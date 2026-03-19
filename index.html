@@ -2,25 +2,82 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Pflanzen bestimmen</title>
+  <title>Pflanzen bestimmen – Profi-Version</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-green-50 flex items-center justify-center min-h-screen">
 
 <div class="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-xl w-full text-center">
-  <h1 class="text-xl md:text-2xl font-bold mb-4">🌼 Pflanzen bestimmen</h1>
-  <p id="frage" class="text-lg mb-4"></p>
+  <h1 class="text-xl md:text-2xl font-bold mb-2">🌼 Pflanzen bestimmen</h1>
+  <p class="text-sm mb-4">Finde die richtige Pflanze – Schritt für Schritt!</p>
 
-  <img id="bild" src="" class="mx-auto mb-4 rounded-xl max-h-48 hidden" />
+  <p id="frage" class="text-lg mb-4"></p>
+  <canvas id="skizze" width="300" height="200" class="mx-auto mb-4 border rounded-xl"></canvas>
 
   <div id="buttons" class="grid gap-3"></div>
+  <p id="feedback" class="mt-4 font-semibold"></p>
 </div>
 
 <script>
+let score = 0;
+let total = 0;
+
+function draw(type) {
+  const canvas = document.getElementById("skizze");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+
+  if(type === "dolde"){
+    for(let i=0;i<8;i++){
+      let angle = (i/8)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(150,100);
+      ctx.lineTo(150+60*Math.cos(angle),100+60*Math.sin(angle));
+      ctx.stroke();
+    }
+    ctx.fillText("Dolde",120,180);
+  }
+
+  if(type === "5blaetter"){
+    for(let i=0;i<5;i++){
+      let angle = (i/5)*Math.PI*2;
+      ctx.beginPath();
+      ctx.arc(150+40*Math.cos(angle),100+40*Math.sin(angle),15,0,Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.fillText("5 Blütenblätter",90,180);
+  }
+
+  if(type === "lippe"){
+    ctx.beginPath();
+    ctx.arc(150,100,40,0,Math.PI);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(150,120,40,Math.PI,2*Math.PI);
+    ctx.stroke();
+    ctx.fillText("Lippenblüte",100,180);
+  }
+
+  if(type === "glocke"){
+    ctx.beginPath();
+    ctx.moveTo(120,60);
+    ctx.lineTo(180,60);
+    ctx.lineTo(170,140);
+    ctx.lineTo(130,140);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillText("Glocke",120,180);
+  }
+}
+
 const steps = {
   start: {
-    frage: "Welche Blütenfarbe hat die Pflanze?",
+    frage: "Welche Farbe hat die Blüte?",
+    draw: null,
     optionen: [
       {text: "Weiß", next: "weiss"},
       {text: "Gelb", next: "gelb"},
@@ -29,67 +86,57 @@ const steps = {
   },
 
   weiss: {
-    frage: "Wie viele Blütenblätter hat die Blüte?",
+    frage: "Wie viele Blütenblätter?",
+    draw: "5blaetter",
     optionen: [
-      {text: "5", next: "dolde"},
-      {text: "< 5", next: "form_weiss"}
+      {text: "5", result: "Walderdbeere 🍓"},
+      {text: "Viele kleine (Dolde)", next: "dolde"}
     ]
   },
 
   dolde: {
-    frage: "Sind die Blüten wie ein Schirm (Dolde)?",
+    frage: "Schirmförmig angeordnet?",
+    draw: "dolde",
     optionen: [
-      {text: "Ja", result: "Wilde Möhre", img: "images/wilde_moehre.jpg"},
-      {text: "Nein", result: "Walderdbeere", img: "images/walderdbeere.jpg"}
-    ]
-  },
-
-  form_weiss: {
-    frage: "Form der Blütenblätter?",
-    optionen: [
-      {text: "Rund", result: "Knoblauchsrauke", img: "images/knoblauchsrauke.jpg"},
-      {text: "Spitz", result: "Wiesenkerbel", img: "images/wiesenkerbel.jpg"}
+      {text: "Ja", result: "Wilde Möhre 🥕"},
+      {text: "Nein", result: "Wiesenkerbel 🌿"}
     ]
   },
 
   gelb: {
     frage: "Wie viele Blütenblätter?",
+    draw: "5blaetter",
     optionen: [
-      {text: "> 5", result: "Löwenzahn", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Taraxacum.jpg/320px-Taraxacum.jpg"},
-      {text: "5", result: "Johanniskraut", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Hypericum_perforatum.jpg/320px-Hypericum_perforatum.jpg"}
+      {text: "Sehr viele", result: "Löwenzahn 🌼"},
+      {text: "5", result: "Johanniskraut 🌿"}
     ]
   },
 
   lila: {
-    frage: "Ist es eine Lippenblüte?",
+    frage: "Welche Form hat die Blüte?",
+    draw: null,
     optionen: [
-      {text: "Ja", next: "lippe"},
-      {text: "Nein", next: "glocke"}
+      {text: "Lippenform", next: "lippe"},
+      {text: "Glocke", next: "glocke"},
+      {text: "Andere", result: "Flockenblume 🌸"}
     ]
   },
 
   lippe: {
-    frage: "Welche Farbe genau?",
+    frage: "Wie sieht die Blüte aus?",
+    draw: "lippe",
     optionen: [
-      {text: "Gefleckt", result: "Gefleckte Taubnessel", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Lamium_maculatum.jpg/320px-Lamium_maculatum.jpg"},
-      {text: "Lila", result: "Wiesensalbei", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Salvia_pratensis.jpg/320px-Salvia_pratensis.jpg"},
-      {text: "Weiß", result: "Thymian", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Thymus.jpg/320px-Thymus.jpg"}
+      {text: "Gefleckt", result: "Taubnessel 🌸"},
+      {text: "Einfarbig", result: "Wiesensalbei 🌿"}
     ]
   },
 
   glocke: {
-    frage: "Ist die Blüte glockenförmig?",
+    frage: "Glockenförmig?",
+    draw: "glocke",
     optionen: [
-      {text: "Ja", result: "Glockenblume", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Campanula.jpg/320px-Campanula.jpg"},
-      {text: "Nein", next: "weitere"}
-    ]
-  },
-
-  weitere: {
-    frage: "Welche passt besser?",
-    optionen: [
-      {text: "Rund", result: "Acker-Witwenblume", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Knautia_arvensis.jpg/320px-Knautia_arvensis.jpg"},
-      {text: "Spitz", result: "Wiesen-Flockenblume", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Centaurea_jacea.jpg/320px-Centaurea_jacea.jpg"}
+      {text: "Ja", result: "Glockenblume 🔔"},
+      {text: "Nein", result: "Witwenblume 🌸"}
     ]
   }
 };
@@ -97,9 +144,15 @@ const steps = {
 function render(stepKey) {
   const step = steps[stepKey];
   document.getElementById("frage").innerText = step.frage;
+  document.getElementById("feedback").innerText = "";
+
+  if(step.draw) draw(step.draw);
+  else {
+    const ctx = document.getElementById("skizze").getContext("2d");
+    ctx.clearRect(0,0,300,200);
+  }
+
   const container = document.getElementById("buttons");
-  const img = document.getElementById("bild");
-  img.classList.add("hidden");
   container.innerHTML = "";
 
   step.optionen.forEach(opt => {
@@ -109,12 +162,11 @@ function render(stepKey) {
 
     btn.onclick = () => {
       if (opt.result) {
+        total++;
+        score++;
         document.getElementById("frage").innerText = "👉 " + opt.result;
-        if (opt.img) {
-          img.src = opt.img;
-          img.classList.remove("hidden");
-        }
-        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neu starten</button>';
+        document.getElementById("feedback").innerText = `Punkte: ${score}/${total}`;
+        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neue Pflanze</button>';
       } else {
         render(opt.next);
       }
