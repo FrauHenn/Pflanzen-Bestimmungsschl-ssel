@@ -10,14 +10,14 @@
 
 <div class="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-xl w-full text-center">
   <h1 class="text-xl md:text-2xl font-bold mb-2">🌼 Pflanzen bestimmen</h1>
-  <p class="text-sm mb-4">Mit Tipps & Vergleichsbildern</p>
+  <p class="text-sm mb-4">Interaktiver Bestimmungsschlüssel mit Tipps & Vergleichsbildern</p>
 
   <p id="frage" class="text-lg mb-2"></p>
   <p id="hilfe" class="text-sm text-gray-600 mb-2 hidden"></p>
 
-  <div class="flex gap-2 justify-center mb-3">
-    <button onclick="toggleTipp()" class="bg-yellow-200 px-3 py-1 rounded-xl">💡 Tipp anzeigen</button>
-  </div>
+  <button onclick="toggleTipp()" class="bg-yellow-200 px-3 py-1 rounded-xl mb-3">💡 Tipp anzeigen</button>
+
+  <canvas id="skizze" width="200" height="150" class="mx-auto mb-3 border rounded hidden"></canvas>
 
   <div id="bilder" class="flex gap-2 justify-center mb-4"></div>
 
@@ -27,99 +27,96 @@
 <script>
 let tippSichtbar = false;
 
+function drawSketch(type){
+  const c=document.getElementById("skizze");
+  const ctx=c.getContext("2d");
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.strokeStyle="black";
+
+  if(type==="dolde"){
+    for(let i=0;i<8;i++){
+      let a=(i/8)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(100,75);
+      ctx.lineTo(100+50*Math.cos(a),75+50*Math.sin(a));
+      ctx.stroke();
+    }
+  }
+
+  if(type==="lippe"){
+    ctx.beginPath();ctx.arc(100,70,30,0,Math.PI);ctx.stroke();
+    ctx.beginPath();ctx.arc(100,90,30,Math.PI,2*Math.PI);ctx.stroke();
+  }
+
+  if(type==="glocke"){
+    ctx.beginPath();
+    ctx.moveTo(70,40);
+    ctx.lineTo(130,40);
+    ctx.lineTo(120,110);
+    ctx.lineTo(80,110);
+    ctx.closePath();ctx.stroke();
+  }
+
+  if(type==="pflanze"){
+    ctx.beginPath();ctx.moveTo(100,130);ctx.lineTo(100,60);ctx.stroke();
+    ctx.beginPath();ctx.arc(100,50,20,0,Math.PI*2);ctx.stroke();
+  }
+}
+
 const bilder = {
-  dolde: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Daucus_carota.jpg/320px-Daucus_carota.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Anthriscus_sylvestris.jpg/320px-Anthriscus_sylvestris.jpg"
-  ],
-  lippe: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Lamium_maculatum.jpg/320px-Lamium_maculatum.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Salvia_pratensis.jpg/320px-Salvia_pratensis.jpg"
-  ],
-  glocke: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Campanula.jpg/320px-Campanula.jpg"
-  ],
-  korb: [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Taraxacum.jpg/320px-Taraxacum.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Bellis_perennis.jpg/320px-Bellis_perennis.jpg"
-  ]
+  dolde:["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Daucus_carota.jpg/320px-Daucus_carota.jpg"],
+  lippe:["https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Lamium_maculatum.jpg/320px-Lamium_maculatum.jpg"],
+  glocke:["https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Campanula.jpg/320px-Campanula.jpg"]
 };
 
 const steps = {
-  start:{
-    frage:"Welche Farbe hat die Blüte?",
-    hilfe:"Schau dir die Blüte genau an.",
-    optionen:[
-      {text:"weiß",next:"weiss"},
-      {text:"gelb",next:"gelb"},
-      {text:"blau / violett",next:"blau"}
-    ]
-  },
+  start:{frage:"Welche Farbe hat die Blüte?",hilfe:"Schau genau hin.",optionen:[
+    {text:"weiß",next:"weiss"},{text:"gelb",next:"gelb"},{text:"blau",next:"blau"}
+  ]},
 
-  weiss:{
-    frage:"Sind viele kleine Blüten wie ein Regenschirm angeordnet?",
-    hilfe:"Dolde = viele kleine Blüten stehen wie ein Regenschirm zusammen.",
-    bild:"dolde",
-    optionen:[
-      {text:"ja",result:"Wilde Möhre"},
-      {text:"nein",result:"Walderdbeere"}
-    ]
-  },
+  weiss:{frage:"Sind viele kleine Blüten wie ein Regenschirm angeordnet?",hilfe:"Dolde = wie ein Regenschirm.",skizze:"dolde",bild:"dolde",optionen:[
+    {text:"ja",result:"Wilde Möhre"},{text:"nein",result:"Walderdbeere"}
+  ]},
 
-  gelb:{
-    frage:"Besteht die Blüte aus vielen kleinen Einzelblüten?",
-    hilfe:"Blütenkorb = viele kleine Blüten bilden zusammen eine große Blüte.",
-    bild:"korb",
-    optionen:[
-      {text:"ja",result:"Löwenzahn"},
-      {text:"nein",next:"gelb2"}
-    ]
-  },
+  gelb:{frage:"Viele kleine Blüten zusammen?",hilfe:"Blütenkorb wie beim Löwenzahn.",optionen:[
+    {text:"ja",result:"Löwenzahn"},{text:"nein",result:"Hahnenfuß"}
+  ]},
 
-  gelb2:{
-    frage:"Hat die Blüte genau 5 Blütenblätter?",
-    hilfe:"Zähle die Blätter.",
-    optionen:[
-      {text:"ja",result:"Johanniskraut"},
-      {text:"nein",result:"Hahnenfuß"}
-    ]
-  },
+  blau:{frage:"Sieht die Blüte wie ein Mund aus?",hilfe:"Lippenblüte.",skizze:"lippe",bild:"lippe",optionen:[
+    {text:"ja",result:"Taubnessel"},{text:"nein",next:"blau2"}
+  ]},
 
-  blau:{
-    frage:"Sieht die Blüte wie ein offener Mund aus?",
-    hilfe:"Lippenblüte = sieht aus wie ein Mund mit Ober- und Unterlippe.",
-    bild:"lippe",
-    optionen:[
-      {text:"ja",result:"Taubnessel"},
-      {text:"nein",next:"blau2"}
-    ]
-  },
-
-  blau2:{
-    frage:"Sieht die Blüte wie eine Glocke aus?",
-    hilfe:"Achte auf die Form der Blüte.",
-    bild:"glocke",
-    optionen:[
-      {text:"ja",result:"Glockenblume"},
-      {text:"nein",result:"Flockenblume"}
-    ]
-  }
+  blau2:{frage:"Sieht sie wie eine Glocke aus?",hilfe:"Glockenform.",skizze:"glocke",bild:"glocke",optionen:[
+    {text:"ja",result:"Glockenblume"},{text:"nein",result:"Flockenblume"}
+  ]}
 };
 
 function toggleTipp(){
-  tippSichtbar = !tippSichtbar;
-  document.getElementById("hilfe").classList.toggle("hidden", !tippSichtbar);
+  tippSichtbar=!tippSichtbar;
+  document.getElementById("hilfe").classList.toggle("hidden",!tippSichtbar);
+  const step=currentStep;
+  if(tippSichtbar && steps[step].skizze){
+    const canvas=document.getElementById("skizze");
+    canvas.classList.remove("hidden");
+    drawSketch(steps[step].skizze);
+  } else {
+    document.getElementById("skizze").classList.add("hidden");
+  }
 }
 
+let currentStep="start";
+
 function render(stepKey){
+  currentStep=stepKey;
   const step=steps[stepKey];
   document.getElementById("frage").innerText=step.frage;
-  document.getElementById("hilfe").innerText=step.hilfe || "";
+  document.getElementById("hilfe").innerText=step.hilfe||"";
   document.getElementById("hilfe").classList.add("hidden");
-  tippSichtbar = false;
+  document.getElementById("skizze").classList.add("hidden");
+  tippSichtbar=false;
 
-  const bilderDiv = document.getElementById("bilder");
-  bilderDiv.innerHTML = "";
+  const bilderDiv=document.getElementById("bilder");
+  bilderDiv.innerHTML="";
 
   if(step.bild && bilder[step.bild]){
     bilder[step.bild].forEach(src=>{
@@ -140,9 +137,14 @@ function render(stepKey){
 
     b.onclick=()=>{
       if(opt.result){
-        document.getElementById("frage").innerText="👉 " + opt.result;
+        document.getElementById("frage").innerText="👉 "+opt.result;
         document.getElementById("hilfe").innerText="";
         bilderDiv.innerHTML="";
+
+        const canvas=document.getElementById("skizze");
+        canvas.classList.remove("hidden");
+        drawSketch("pflanze");
+
         c.innerHTML='<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neu starten</button>';
       } else render(opt.next);
     };
