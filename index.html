@@ -15,6 +15,9 @@
   <p id="frage" class="text-lg mb-4"></p>
   <canvas id="skizze" width="300" height="200" class="mx-auto mb-4 border rounded-xl"></canvas>
 
+  <img id="realbild" class="mx-auto mb-4 rounded-xl hidden max-h-48" />
+  <p id="familie" class="text-sm mb-2"></p>
+
   <div id="buttons" class="grid gap-3"></div>
   <p id="feedback" class="mt-4 font-semibold"></p>
 </div>
@@ -23,156 +26,120 @@
 let score = 0;
 let total = 0;
 
+const plantData = {
+  "Walderdbeere 🍓": {img:"https://cdn.pixabay.com/photo/2016/06/16/22/52/strawberry-1461605_640.jpg", fam:"Rosengewächse"},
+  "Wilde Möhre 🥕": {img:"https://cdn.pixabay.com/photo/2017/06/02/18/24/wild-carrot-2367022_640.jpg", fam:"Doldenblütler"},
+  "Wiesenkerbel 🌿": {img:"https://cdn.pixabay.com/photo/2018/05/01/18/48/plant-3360195_640.jpg", fam:"Doldenblütler"},
+  "Löwenzahn 🌼": {img:"https://cdn.pixabay.com/photo/2017/04/23/19/30/dandelion-2252719_640.jpg", fam:"Korbblütler"},
+  "Johanniskraut 🌿": {img:"https://cdn.pixabay.com/photo/2018/06/17/17/52/hypericum-3481324_640.jpg", fam:"Johanniskrautgewächse"},
+  "Taubnessel 🌸": {img:"https://cdn.pixabay.com/photo/2017/05/16/21/21/dead-nettle-2319177_640.jpg", fam:"Lippenblütler"},
+  "Wiesensalbei 🌿": {img:"https://cdn.pixabay.com/photo/2017/06/20/19/22/sage-2424376_640.jpg", fam:"Lippenblütler"},
+  "Glockenblume 🔔": {img:"https://cdn.pixabay.com/photo/2016/07/23/00/59/bellflower-1536089_640.jpg", fam:"Glockenblumengewächse"},
+  "Witwenblume 🌸": {img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/flower-2558261_640.jpg", fam:"Geißblattgewächse"},
+  "Flockenblume 🌸": {img:"https://cdn.pixabay.com/photo/2018/06/10/20/01/cornflower-3467049_640.jpg", fam:"Korbblütler"}
+};
+
 function draw(type) {
   const canvas = document.getElementById("skizze");
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
 
   if(type === "dolde"){
     for(let i=0;i<8;i++){
-      let angle = (i/8)*Math.PI*2;
-      ctx.beginPath();
-      ctx.moveTo(150,100);
-      ctx.lineTo(150+60*Math.cos(angle),100+60*Math.sin(angle));
-      ctx.stroke();
+      let a=(i/8)*Math.PI*2;
+      ctx.beginPath();ctx.moveTo(150,100);
+      ctx.lineTo(150+60*Math.cos(a),100+60*Math.sin(a));ctx.stroke();
     }
-    ctx.fillText("Dolde",120,180);
   }
 
   if(type === "5blaetter"){
     for(let i=0;i<5;i++){
-      let angle = (i/5)*Math.PI*2;
-      ctx.beginPath();
-      ctx.arc(150+40*Math.cos(angle),100+40*Math.sin(angle),15,0,Math.PI*2);
-      ctx.stroke();
+      let a=(i/5)*Math.PI*2;
+      ctx.beginPath();ctx.arc(150+40*Math.cos(a),100+40*Math.sin(a),15,0,Math.PI*2);ctx.stroke();
     }
-    ctx.fillText("5 Blütenblätter",90,180);
   }
 
   if(type === "lippe"){
-    ctx.beginPath();
-    ctx.arc(150,100,40,0,Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(150,120,40,Math.PI,2*Math.PI);
-    ctx.stroke();
-    ctx.fillText("Lippenblüte",100,180);
+    ctx.beginPath();ctx.arc(150,100,40,0,Math.PI);ctx.stroke();
+    ctx.beginPath();ctx.arc(150,120,40,Math.PI,2*Math.PI);ctx.stroke();
   }
 
   if(type === "glocke"){
-    ctx.beginPath();
-    ctx.moveTo(120,60);
-    ctx.lineTo(180,60);
-    ctx.lineTo(170,140);
-    ctx.lineTo(130,140);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.fillText("Glocke",120,180);
+    ctx.beginPath();ctx.moveTo(120,60);
+    ctx.lineTo(180,60);ctx.lineTo(170,140);
+    ctx.lineTo(130,140);ctx.closePath();ctx.stroke();
   }
 }
 
 const steps = {
-  start: {
-    frage: "Welche Farbe hat die Blüte?",
-    draw: null,
-    optionen: [
-      {text: "Weiß", next: "weiss"},
-      {text: "Gelb", next: "gelb"},
-      {text: "Lila / Blau", next: "lila"}
-    ]
-  },
+  start:{frage:"Welche Farbe hat die Blüte?",optionen:[
+    {text:"Weiß",next:"weiss"},{text:"Gelb",next:"gelb"},{text:"Lila / Blau",next:"lila"}
+  ]},
 
-  weiss: {
-    frage: "Wie viele Blütenblätter?",
-    draw: "5blaetter",
-    optionen: [
-      {text: "5", result: "Walderdbeere 🍓"},
-      {text: "Viele kleine (Dolde)", next: "dolde"}
-    ]
-  },
+  weiss:{frage:"Wie viele Blütenblätter?",draw:"5blaetter",optionen:[
+    {text:"5",result:"Walderdbeere 🍓"},{text:"Viele kleine (Dolde)",next:"dolde"}
+  ]},
 
-  dolde: {
-    frage: "Schirmförmig angeordnet?",
-    draw: "dolde",
-    optionen: [
-      {text: "Ja", result: "Wilde Möhre 🥕"},
-      {text: "Nein", result: "Wiesenkerbel 🌿"}
-    ]
-  },
+  dolde:{frage:"Schirmförmig?",draw:"dolde",optionen:[
+    {text:"Ja",result:"Wilde Möhre 🥕"},{text:"Nein",result:"Wiesenkerbel 🌿"}
+  ]},
 
-  gelb: {
-    frage: "Wie viele Blütenblätter?",
-    draw: "5blaetter",
-    optionen: [
-      {text: "Sehr viele", result: "Löwenzahn 🌼"},
-      {text: "5", result: "Johanniskraut 🌿"}
-    ]
-  },
+  gelb:{frage:"Wie viele Blütenblätter?",draw:"5blaetter",optionen:[
+    {text:"Sehr viele",result:"Löwenzahn 🌼"},{text:"5",result:"Johanniskraut 🌿"}
+  ]},
 
-  lila: {
-    frage: "Welche Form hat die Blüte?",
-    draw: null,
-    optionen: [
-      {text: "Lippenform", next: "lippe"},
-      {text: "Glocke", next: "glocke"},
-      {text: "Andere", result: "Flockenblume 🌸"}
-    ]
-  },
+  lila:{frage:"Welche Form?",optionen:[
+    {text:"Lippenform",next:"lippe"},{text:"Glocke",next:"glocke"},{text:"Andere",result:"Flockenblume 🌸"}
+  ]},
 
-  lippe: {
-    frage: "Wie sieht die Blüte aus?",
-    draw: "lippe",
-    optionen: [
-      {text: "Gefleckt", result: "Taubnessel 🌸"},
-      {text: "Einfarbig", result: "Wiesensalbei 🌿"}
-    ]
-  },
+  lippe:{frage:"Wie sieht sie aus?",draw:"lippe",optionen:[
+    {text:"Gefleckt",result:"Taubnessel 🌸"},{text:"Einfarbig",result:"Wiesensalbei 🌿"}
+  ]},
 
-  glocke: {
-    frage: "Glockenförmig?",
-    draw: "glocke",
-    optionen: [
-      {text: "Ja", result: "Glockenblume 🔔"},
-      {text: "Nein", result: "Witwenblume 🌸"}
-    ]
-  }
+  glocke:{frage:"Glockenförmig?",draw:"glocke",optionen:[
+    {text:"Ja",result:"Glockenblume 🔔"},{text:"Nein",result:"Witwenblume 🌸"}
+  ]}
 };
 
-function render(stepKey) {
-  const step = steps[stepKey];
-  document.getElementById("frage").innerText = step.frage;
-  document.getElementById("feedback").innerText = "";
+function render(stepKey){
+  const step=steps[stepKey];
+  document.getElementById("frage").innerText=step.frage;
+  document.getElementById("feedback").innerText="";
+  document.getElementById("realbild").classList.add("hidden");
+  document.getElementById("familie").innerText="";
 
   if(step.draw) draw(step.draw);
-  else {
-    const ctx = document.getElementById("skizze").getContext("2d");
-    ctx.clearRect(0,0,300,200);
-  }
+  else document.getElementById("skizze").getContext("2d").clearRect(0,0,300,200);
 
-  const container = document.getElementById("buttons");
-  container.innerHTML = "";
+  const c=document.getElementById("buttons");
+  c.innerHTML="";
 
-  step.optionen.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "bg-green-200 hover:bg-green-300 p-3 rounded-2xl text-lg";
-    btn.innerText = opt.text;
+  step.optionen.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="bg-green-200 hover:bg-green-300 p-3 rounded-2xl text-lg";
+    b.innerText=opt.text;
 
-    btn.onclick = () => {
-      if (opt.result) {
-        total++;
-        score++;
-        document.getElementById("frage").innerText = "👉 " + opt.result;
-        document.getElementById("feedback").innerText = `Punkte: ${score}/${total}`;
-        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neue Pflanze</button>';
-      } else {
-        render(opt.next);
-      }
+    b.onclick=()=>{
+      if(opt.result){
+        total++; score++;
+        document.getElementById("frage").innerText="👉 "+opt.result;
+        document.getElementById("feedback").innerText=`Punkte: ${score}/${total}`;
+
+        const data=plantData[opt.result];
+        if(data){
+          const img=document.getElementById("realbild");
+          img.src=data.img;
+          img.classList.remove("hidden");
+          document.getElementById("familie").innerText="Familie: "+data.fam;
+        }
+
+        c.innerHTML='<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neue Pflanze</button>';
+      } else render(opt.next);
     };
 
-    container.appendChild(btn);
+    c.appendChild(b);
   });
 }
 
