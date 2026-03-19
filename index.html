@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Pflanzen bestimmen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-green-50 flex items-center justify-center min-h-screen">
 
-<div class="bg-white shadow-xl rounded-2xl p-6 max-w-xl w-full text-center">
-  <h1 class="text-2xl font-bold mb-4">🌼 Pflanzen bestimmen</h1>
-  <p id="frage" class="text-lg mb-6">Welche Blütenfarbe hat die Pflanze?</p>
+<div class="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-xl w-full text-center">
+  <h1 class="text-xl md:text-2xl font-bold mb-4">🌼 Pflanzen bestimmen</h1>
+  <p id="frage" class="text-lg mb-4"></p>
+
+  <img id="bild" src="" class="mx-auto mb-4 rounded-xl max-h-48 hidden" />
 
   <div id="buttons" class="grid gap-3"></div>
 </div>
@@ -29,55 +32,64 @@ const steps = {
     frage: "Wie viele Blütenblätter hat die Blüte?",
     optionen: [
       {text: "5", next: "dolde"},
-      {text: "Weniger als 5", next: "form_weiss"}
+      {text: "< 5", next: "form_weiss"}
     ]
   },
 
   dolde: {
-    frage: "Sind die Blüten wie ein Schirm (Dolde) angeordnet?",
+    frage: "Sind die Blüten wie ein Schirm (Dolde)?",
     optionen: [
-      {text: "Ja", result: "Das ist wahrscheinlich die Wilde Möhre 🥕"},
-      {text: "Nein", result: "Das ist wahrscheinlich die Walderdbeere 🍓"}
+      {text: "Ja", result: "Wilde Möhre", img: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Daucus_carota.jpg"},
+      {text: "Nein", result: "Walderdbeere", img: "https://upload.wikimedia.org/wikipedia/commons/2/29/Fragaria_vesca.jpg"}
     ]
   },
 
   form_weiss: {
-    frage: "Sind die Blütenblätter rund oder spitz?",
+    frage: "Form der Blütenblätter?",
     optionen: [
-      {text: "Rund", result: "Das ist wahrscheinlich Knoblauchsrauke 🌿"},
-      {text: "Spitz", result: "Das ist wahrscheinlich Wiesenkerbel 🌼"}
+      {text: "Rund", result: "Knoblauchsrauke", img: "https://upload.wikimedia.org/wikipedia/commons/8/89/Alliaria_petiolata.jpg"},
+      {text: "Spitz", result: "Wiesenkerbel", img: "https://upload.wikimedia.org/wikipedia/commons/0/0f/Anthriscus_sylvestris.jpg"}
     ]
   },
 
   gelb: {
-    frage: "Wie viele Blütenblätter hat die Blüte?",
+    frage: "Wie viele Blütenblätter?",
     optionen: [
-      {text: "Mehr als 5", result: "Das ist wahrscheinlich Löwenzahn 🌼"},
-      {text: "Genau 5", result: "Das ist wahrscheinlich Johanniskraut 🌿"}
+      {text: "> 5", result: "Löwenzahn", img: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Taraxacum.jpg"},
+      {text: "5", result: "Johanniskraut", img: "https://upload.wikimedia.org/wikipedia/commons/2/27/Hypericum_perforatum.jpg"}
     ]
   },
 
   lila: {
-    frage: "Hat die Blüte eine Lippenform (wie ein offener Mund)?",
+    frage: "Ist es eine Lippenblüte?",
     optionen: [
-      {text: "Ja", next: "farbe_lippe"},
+      {text: "Ja", next: "lippe"},
       {text: "Nein", next: "glocke"}
     ]
   },
 
-  farbe_lippe: {
-    frage: "Welche Farbe hat die Blüte genau?",
+  lippe: {
+    frage: "Welche Farbe genau?",
     optionen: [
-      {text: "Gefleckt", result: "Das ist wahrscheinlich Gefleckte Taubnessel 🌸"},
-      {text: "Lila", result: "Das ist wahrscheinlich Wiesensalbei 🌿"}
+      {text: "Gefleckt", result: "Gefleckte Taubnessel", img: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Lamium_maculatum.jpg"},
+      {text: "Lila", result: "Wiesensalbei", img: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Salvia_pratensis.jpg"},
+      {text: "Weiß", result: "Thymian", img: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Thymus.jpg"}
     ]
   },
 
   glocke: {
     frage: "Ist die Blüte glockenförmig?",
     optionen: [
-      {text: "Ja", result: "Das ist wahrscheinlich eine Glockenblume 🔔"},
-      {text: "Nein", result: "Das ist wahrscheinlich eine Ackerwitwenblume 🌸"}
+      {text: "Ja", result: "Glockenblume", img: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Campanula.jpg"},
+      {text: "Nein", next: "weitere"}
+    ]
+  },
+
+  weitere: {
+    frage: "Welche passt besser?",
+    optionen: [
+      {text: "Rund", result: "Acker-Witwenblume", img: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Knautia_arvensis.jpg"},
+      {text: "Spitz", result: "Wiesen-Flockenblume", img: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Centaurea_jacea.jpg"}
     ]
   }
 };
@@ -86,17 +98,23 @@ function render(stepKey) {
   const step = steps[stepKey];
   document.getElementById("frage").innerText = step.frage;
   const container = document.getElementById("buttons");
+  const img = document.getElementById("bild");
+  img.classList.add("hidden");
   container.innerHTML = "";
 
   step.optionen.forEach(opt => {
     const btn = document.createElement("button");
-    btn.className = "bg-green-200 hover:bg-green-300 p-3 rounded-xl";
+    btn.className = "bg-green-200 hover:bg-green-300 p-3 rounded-2xl text-lg";
     btn.innerText = opt.text;
 
     btn.onclick = () => {
       if (opt.result) {
-        document.getElementById("frage").innerText = opt.result;
-        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-2 rounded">Neu starten</button>';
+        document.getElementById("frage").innerText = "👉 " + opt.result;
+        if (opt.img) {
+          img.src = opt.img;
+          img.classList.remove("hidden");
+        }
+        container.innerHTML = '<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neu starten</button>';
       } else {
         render(opt.next);
       }
