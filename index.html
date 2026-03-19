@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Pflanzen bestimmen – Erweiterte Profi-Version</title>
+  <title>Dichotomer Bestimmungsschlüssel (Originalstruktur)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -10,7 +10,7 @@
 
 <div class="bg-white shadow-xl rounded-2xl p-4 md:p-6 max-w-xl w-full text-center">
   <h1 class="text-xl md:text-2xl font-bold mb-2">🌼 Pflanzen bestimmen</h1>
-  <p class="text-sm mb-4">Erweiterter Bestimmungsschlüssel</p>
+  <p class="text-sm mb-4">Dichotomer Schlüssel wie im Arbeitsblatt</p>
 
   <p id="frage" class="text-lg mb-4"></p>
 
@@ -18,78 +18,92 @@
   <p id="familie" class="text-sm mb-2"></p>
 
   <div id="buttons" class="grid gap-3"></div>
-  <p id="feedback" class="mt-4 font-semibold"></p>
 </div>
 
 <script>
-let score = 0;
-let total = 0;
-
 const plantData = {
-  "Walderdbeere 🍓": {img:"https://cdn.pixabay.com/photo/2016/06/16/22/52/strawberry-1461605_640.jpg", fam:"Rosengewächse"},
-  "Wilde Möhre 🥕": {img:"https://cdn.pixabay.com/photo/2017/06/02/18/24/wild-carrot-2367022_640.jpg", fam:"Doldenblütler"},
-  "Wiesenkerbel 🌿": {img:"https://cdn.pixabay.com/photo/2018/05/01/18/48/plant-3360195_640.jpg", fam:"Doldenblütler"},
-  "Löwenzahn 🌼": {img:"https://cdn.pixabay.com/photo/2017/04/23/19/30/dandelion-2252719_640.jpg", fam:"Korbblütler"},
-  "Johanniskraut 🌿": {img:"https://cdn.pixabay.com/photo/2018/06/17/17/52/hypericum-3481324_640.jpg", fam:"Johanniskrautgewächse"},
-  "Hahnenfuß 🌼": {img:"https://cdn.pixabay.com/photo/2017/05/21/18/17/buttercup-2331461_640.jpg", fam:"Hahnenfußgewächse"},
-  "Gänseblümchen 🌼": {img:"https://cdn.pixabay.com/photo/2016/03/27/19/40/daisy-1284454_640.jpg", fam:"Korbblütler"},
-  "Taubnessel 🌸": {img:"https://cdn.pixabay.com/photo/2017/05/16/21/21/dead-nettle-2319177_640.jpg", fam:"Lippenblütler"},
-  "Wiesensalbei 🌿": {img:"https://cdn.pixabay.com/photo/2017/06/20/19/22/sage-2424376_640.jpg", fam:"Lippenblütler"},
-  "Thymian 🌿": {img:"https://cdn.pixabay.com/photo/2017/07/06/20/52/thyme-2478740_640.jpg", fam:"Lippenblütler"},
-  "Glockenblume 🔔": {img:"https://cdn.pixabay.com/photo/2016/07/23/00/59/bellflower-1536089_640.jpg", fam:"Glockenblumengewächse"},
-  "Witwenblume 🌸": {img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/flower-2558261_640.jpg", fam:"Geißblattgewächse"},
-  "Flockenblume 🌸": {img:"https://cdn.pixabay.com/photo/2018/06/10/20/01/cornflower-3467049_640.jpg", fam:"Korbblütler"},
-  "Vergissmeinnicht 🌸": {img:"https://cdn.pixabay.com/photo/2017/04/09/17/38/forget-me-not-2215113_640.jpg", fam:"Raublattgewächse"}
+  "Wilde Möhre": {img:"https://cdn.pixabay.com/photo/2017/06/02/18/24/wild-carrot-2367022_640.jpg", fam:"Doldenblütler"},
+  "Wiesenkerbel": {img:"https://cdn.pixabay.com/photo/2018/05/01/18/48/plant-3360195_640.jpg", fam:"Doldenblütler"},
+  "Walderdbeere": {img:"https://cdn.pixabay.com/photo/2016/06/16/22/52/strawberry-1461605_640.jpg", fam:"Rosengewächse"},
+  "Knoblauchsrauke": {img:"https://cdn.pixabay.com/photo/2017/04/05/01/16/garlic-mustard-2206015_640.jpg", fam:"Kreuzblütler"},
+  "Löwenzahn": {img:"https://cdn.pixabay.com/photo/2017/04/23/19/30/dandelion-2252719_640.jpg", fam:"Korbblütler"},
+  "Johanniskraut": {img:"https://cdn.pixabay.com/photo/2018/06/17/17/52/hypericum-3481324_640.jpg", fam:"Johanniskrautgewächse"},
+  "Hahnenfuß": {img:"https://cdn.pixabay.com/photo/2017/05/21/18/17/buttercup-2331461_640.jpg", fam:"Hahnenfußgewächse"},
+  "Gänseblümchen": {img:"https://cdn.pixabay.com/photo/2016/03/27/19/40/daisy-1284454_640.jpg", fam:"Korbblütler"},
+  "Taubnessel": {img:"https://cdn.pixabay.com/photo/2017/05/16/21/21/dead-nettle-2319177_640.jpg", fam:"Lippenblütler"},
+  "Wiesensalbei": {img:"https://cdn.pixabay.com/photo/2017/06/20/19/22/sage-2424376_640.jpg", fam:"Lippenblütler"},
+  "Thymian": {img:"https://cdn.pixabay.com/photo/2017/07/06/20/52/thyme-2478740_640.jpg", fam:"Lippenblütler"},
+  "Glockenblume": {img:"https://cdn.pixabay.com/photo/2016/07/23/00/59/bellflower-1536089_640.jpg", fam:"Glockenblumengewächse"},
+  "Witwenblume": {img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/flower-2558261_640.jpg", fam:"Geißblattgewächse"},
+  "Flockenblume": {img:"https://cdn.pixabay.com/photo/2018/06/10/20/01/cornflower-3467049_640.jpg", fam:"Korbblütler"}
 };
 
 const steps = {
-  start:{frage:"Welche Farbe hat die Blüte?",optionen:[
-    {text:"Weiß",next:"weiss"},{text:"Gelb",next:"gelb"},{text:"Blau / Lila",next:"blau"}
+  start:{frage:"1. Blütenfarbe?",optionen:[
+    {text:"weiß",next:"weiss"},
+    {text:"gelb",next:"gelb"},
+    {text:"blau / violett",next:"blau"}
   ]},
 
-  weiss:{frage:"Wie sieht die Blüte aus?",optionen:[
-    {text:"Viele kleine Blüten (schirmförmig)",next:"dolde"},
-    {text:"Einzelne größere Blüte",result:"Gänseblümchen 🌼"}
+  weiss:{frage:"2. Blüten in Dolde (schirmförmig)?",optionen:[
+    {text:"ja",result:"Wilde Möhre"},
+    {text:"nein",next:"weiss2"}
   ]},
 
-  dolde:{frage:"Sind die Blüten wie ein Schirm angeordnet?",optionen:[
-    {text:"Ja",result:"Wilde Möhre 🥕"},
-    {text:"Nein",result:"Wiesenkerbel 🌿"}
+  weiss2:{frage:"3. Viele kleine Doldenblüten?",optionen:[
+    {text:"ja",result:"Wiesenkerbel"},
+    {text:"nein",next:"weiss3"}
   ]},
 
-  gelb:{frage:"Wie viele Blütenblätter?",optionen:[
-    {text:"Sehr viele kleine",result:"Löwenzahn 🌼"},
-    {text:"5 glänzende",result:"Hahnenfuß 🌼"},
-    {text:"5 normale",result:"Johanniskraut 🌿"}
+  weiss3:{frage:"4. 5 Blütenblätter?",optionen:[
+    {text:"ja",result:"Walderdbeere"},
+    {text:"nein",result:"Knoblauchsrauke"}
   ]},
 
-  blau:{frage:"Welche Form hat die Blüte?",optionen:[
-    {text:"Lippenform",next:"lippe"},
-    {text:"Glocke",next:"glocke"},
-    {text:"Sehr klein (sternförmig)",result:"Vergissmeinnicht 🌸"},
-    {text:"Fransig",result:"Flockenblume 🌸"}
+  gelb:{frage:"2. Viele kleine Blüten (Korb)?",optionen:[
+    {text:"ja",result:"Löwenzahn"},
+    {text:"nein",next:"gelb2"}
   ]},
 
-  lippe:{frage:"Wie sieht sie aus?",optionen:[
-    {text:"Gefleckt",result:"Taubnessel 🌸"},
-    {text:"Einfarbig",next:"lippe2"}
+  gelb2:{frage:"3. 5 Blütenblätter?",optionen:[
+    {text:"ja",next:"gelb3"},
+    {text:"nein",result:"Gänseblümchen"}
   ]},
 
-  lippe2:{frage:"Welche Pflanze passt besser?",optionen:[
-    {text:"Größere Blüte",result:"Wiesensalbei 🌿"},
-    {text:"Kleine Blüten",result:"Thymian 🌿"}
+  gelb3:{frage:"4. Glänzende Blütenblätter?",optionen:[
+    {text:"ja",result:"Hahnenfuß"},
+    {text:"nein",result:"Johanniskraut"}
   ]},
 
-  glocke:{frage:"Glockenförmig?",optionen:[
-    {text:"Ja",result:"Glockenblume 🔔"},
-    {text:"Nein",result:"Witwenblume 🌸"}
+  blau:{frage:"2. Lippenblüte?",optionen:[
+    {text:"ja",next:"lippe"},
+    {text:"nein",next:"blau2"}
+  ]},
+
+  lippe:{frage:"3. Gefleckt?",optionen:[
+    {text:"ja",result:"Taubnessel"},
+    {text:"nein",next:"lippe2"}
+  ]},
+
+  lippe2:{frage:"4. Große Blüte?",optionen:[
+    {text:"ja",result:"Wiesensalbei"},
+    {text:"nein",result:"Thymian"}
+  ]},
+
+  blau2:{frage:"3. Glockenförmig?",optionen:[
+    {text:"ja",result:"Glockenblume"},
+    {text:"nein",next:"blau3"}
+  ]},
+
+  blau3:{frage:"4. Fransige Blüte?",optionen:[
+    {text:"ja",result:"Flockenblume"},
+    {text:"nein",result:"Witwenblume"}
   ]}
 };
 
 function render(stepKey){
   const step=steps[stepKey];
   document.getElementById("frage").innerText=step.frage;
-  document.getElementById("feedback").innerText="";
   document.getElementById("realbild").classList.add("hidden");
   document.getElementById("familie").innerText="";
 
@@ -103,10 +117,7 @@ function render(stepKey){
 
     b.onclick=()=>{
       if(opt.result){
-        total++; score++;
         document.getElementById("frage").innerText="👉 "+opt.result;
-        document.getElementById("feedback").innerText=`Punkte: ${score}/${total}`;
-
         const data=plantData[opt.result];
         if(data){
           const img=document.getElementById("realbild");
@@ -114,8 +125,7 @@ function render(stepKey){
           img.classList.remove("hidden");
           document.getElementById("familie").innerText="Familie: "+data.fam;
         }
-
-        c.innerHTML='<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neue Pflanze</button>';
+        c.innerHTML='<button onclick="render(\'start\')" class="mt-4 bg-blue-200 p-3 rounded-xl">🔄 Neu starten</button>';
       } else render(opt.next);
     };
 
@@ -128,5 +138,3 @@ render("start");
 
 </body>
 </html>
-
-
